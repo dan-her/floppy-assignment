@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 			else
 			{
             printf("Image at %s mounted.\n", floppyPath);
+			mounted = 1;
 			}
-            mounted = 1;
 
         }
         else if (strcmp(command, "fumount") == 0)
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         {
             buf = (char *) malloc(512);
             read(floppyDrive, buf, 512); //puts the boot sector into memory
-            char bytesPerSector = buf[11];
+            int bytesPerSector = buf[11] + buf[12] << 8;
 			printf("bytesPerSector = %d\n", bytesPerSector);
             char sectorsPerCluster = buf[13];
             char fatCount = buf[16];
