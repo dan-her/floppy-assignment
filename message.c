@@ -9,23 +9,6 @@
 #include <ctype.h>
 #include <limits.h>
 
-
-void help()
-{
-    printf("fmount \t\t\tmounts a local floppy disk from the specified .img file\n"
-           "fumount \t\t\t\t\t\t\tunmount the mounted floppy disk\nstructure \t\t\t\t\t\t\t"
-           "lists the structure of the floppy disk\ntraverse [-l] \t\t\t\t\t\tlists the content in the root"
-           " directory. switch l shows all detailed information about a file\nshowsector [sector number]\t\t"
-           "\tshow the content of the specified sector (512 bytes of hex dump)\nshowfat \t\t\t\t\t\t\tshows"
-           " the content of the first 256 entries of the FAT table (as a hex dump)\nshowfile [filename] "
-           "\t\t\t\tshows the content of the file (as a hex dump)\nquit\t\t\t\t\t\t\t\tquits the Floppy Disk Browser shell\n");
-}
-
-void quit()
-{
-
-}
-
 int main(int argc, char *argv[])
 {
     char command[128];
@@ -91,15 +74,11 @@ int main(int argc, char *argv[])
             char bytesPerSector = buf[11];
 			printf("bytesPerSector = %d\n", bytesPerSector);
             char sectorsPerCluster = buf[13];
-			printf("sectorsPerCluster = %d\n", sectorsPerCluster);
             char fatCount = buf[16];
-			printf("fatCount = %d\n", fatCount);
             unsigned char rootEntries = buf[17];
-			printf("rootEntries = %d\n", rootEntries);
             int sectorsPerFat = buf[22];
-			printf("sectorsPerFat = %d\n", sectorsPerFat);
 
-            printf("number of FAT:			    %c\nnumber of sectors used by FAT:	    %d\nnumber of sectors per cluster:	    %c\n"
+            printf("number of FAT:			    %d\nnumber of sectors used by FAT:	    %d\nnumber of sectors per cluster:	    %d\n"
             "number of ROOT Entries:		  %d\nnumber of bytes per sector:	  %d\n",
             fatCount, sectorsPerFat, sectorsPerCluster, rootEntries, bytesPerSector); // just printing in given format, separated into two parts so more comments can fit
             printf(""
