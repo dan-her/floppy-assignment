@@ -27,7 +27,6 @@ int main(int argc, char *argv[])
     {
         if (strcmp(command, "fmount") == 0)
         {
-            printf("enter path of floppy to be mounted: \n");
             char floppyPath[128];
             scanf("%s", floppyPath);
             floppyDrive = open(floppyPath, O_RDONLY, 0); // removed the DIR use since DIR can't actually open files, only directories.
@@ -89,14 +88,43 @@ int main(int argc, char *argv[])
                    "%d -- %d			ROOT DIRECTORY\n", (sectorsPerFat), (sectorsPerFat+1), ((int)fatCount*sectorsPerFat), (((int)fatCount*sectorsPerFat)+1), (((rootEntries*32)/bytesPerSector)+(int)fatCount*sectorsPerFat) );
 			lseek(floppyDrive, 0L, 0);// needed to return to start of file
         }
-        else if ((strcmp(command, "traverse") == 0) && (mounted == 1))
+        else if ((strcmp(command, "traverse") == 0) && (mounted == 1)) // this is not working! do not use it yet, unless you mean to test it
         {
-
+			char potentialFlag[128];
+			scanf("%s", potentialFlag); // makes a flag required, not sure how to skip it if there's no flag
+			buf = (char *) malloc(32); // buf is going to be used on a per-entry basis here, so we just give it the file size's space
+			lseek(floppyDrive, 9728L, 0); // seeks past the first 19 sectors of the floppy (19 sectors * 512 bytes each) to get to root
+			if (potentialFlag == "-l")
+			{
+				// should be about the same as the else, but with some extra prints and extra value checking in buf
+			}
+			else
+			{
+				for (i = 0; i < 224; i++) // iterates thru the whole of root
+				{
+					read(floppyDrive, buf, 32); // reads the file
+					for (j = 1; j < 9; j++)
+					{
+						char filename = buf[j];
+						printf("%c-", filename);//for some reason there's an extra blank character printed between each character, shown by the "-"
+					}
+					printf("\n"); // moves to the next line for the next filename
+					/* this conditional might not be needed, but I'm keeping it around on the off-chance it is
+					if () // the whole of buf is empty, meaning that there is no file.
+					{
+						;  //just do nothing for that file
+					}
+					else
+					{
+						
+					}*/
+				}
+			}
+			lseek(floppyDrive, 0L, 0);// needed to return to start of file
         }
         else if ((strcmp(command, "showsector") == 0) && (mounted == 1))
         {
 			char sectornum[4] = {'\0', '\0', '\0', '\0'};// these are not keyboard characters, so we they won't ever be accidentally input
-			printf("Please input the sector number you would like to see.\n");
 			scanf("%s", sectornum); // since scanf can't scan for integers, we have to get crafty
 			j = 0; // ensure that j starts at 0 every time we run the loop
 			for (i = 3; i >= 0; i--) // we have to make sure the sector number is actually valid, so we need to check the elements of sectornum
@@ -188,7 +216,10 @@ int main(int argc, char *argv[])
         {
 
         }
+		else if ((strcmp(command, "showfile") == 0) && (mounted == 1))
+		{
 
+		}
         else if (mounted == 1) // this can be here instead of in every else-if because the ones that don't need it come first.
         {
             printf("unknown command. to see a list of commands, type help\n");
