@@ -68,12 +68,11 @@ int main(int argc, char *argv[])
         {
             exit(0);
         }
-        else if (strcmp(command, "structure") == 0)
+        else if ((strcmp(command, "structure") == 0) && (mounted == 1))
         {
             buf = (char *) malloc(512);
             read(floppyDrive, buf, 512); // puts the boot sector into memory
             int bytesPerSector = buf[11] + buf[12] << 8;
-			printf("bytesPerSector = %d\n", bytesPerSector);
             char sectorsPerCluster = buf[13];
             char fatCount = buf[16];
             unsigned char rootEntries = buf[17];
@@ -90,113 +89,114 @@ int main(int argc, char *argv[])
                    "%d -- %d			ROOT DIRECTORY\n", (sectorsPerFat), (sectorsPerFat+1), ((int)fatCount*sectorsPerFat), (((int)fatCount*sectorsPerFat)+1), (((rootEntries*32)/bytesPerSector)+(int)fatCount*sectorsPerFat) );
 			lseek(floppyDrive, 0L, 0);// needed to return to start of file
         }
-        else if (strcmp(command, "traverse") == 0)
+        else if ((strcmp(command, "traverse") == 0) && (mounted == 1))
         {
 
         }
-        else if (strcmp(command, "showsector") == 0)
+        else if ((strcmp(command, "showsector") == 0) && (mounted == 1))
         {
 			char sectornum[4] = {'\0', '\0', '\0', '\0'};// these are not keyboard characters, so we they won't ever be accidentally input
 			printf("Please input the sector number you would like to see.\n");
 			scanf("%s", sectornum); // since scanf can't scan for integers, we have to get crafty
+			j = 0; // ensure that j starts at 0 every time we run the loop
 			for (i = 3; i >= 0; i--) // we have to make sure the sector number is actually valid, so we need to check the elements of sectornum
 			{
 				if (sectornum[i] == '0') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 0*(int)(pow((double)10, (double)j));
-					printf("0sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '1') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 1*(int)(pow((double)10, (double)j));
-					printf("1sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '2') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 2*(int)(pow((double)10, (double)j));
-					printf("2sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '3') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 3*(int)(pow((double)10, (double)j));
-					printf("3sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '4') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 4*(int)(pow((double)10, (double)j));
-					printf("4sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '5') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 5*(int)(pow((double)10, (double)j));
-					printf("5sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '6') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 6*(int)(pow((double)10, (double)j));
-					printf("6sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '7') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 7*(int)(pow((double)10, (double)j));
-					printf("7sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '8') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 8*(int)(pow((double)10, (double)j));
-					printf("8sectorNum = %d\n", sectorNum);
 					j++;
 				}
 				else if (sectornum[i] == '9') // every one of these is the same, for every digit. puts the digit at its place in sectorNum using the pow fcn
 				{
 					sectorNum = sectorNum + 9*(int)(pow((double)10, (double)j));
-					printf("9sectorNum = %d\n", sectorNum);
 					j++;
 				}
 
 				else // default to not having a value at a power of 10 position
 				{
 					sectorNum = sectorNum + 0;
-					printf("DEFsectorNum = %d\n", sectorNum);
 				}
 			}
-			printf("sectorNum = %d\n", sectorNum);
 			buf = (char *) malloc(512);
 			lseek(floppyDrive, (long)(512*sectorNum), 0);
 			read(floppyDrive, buf, 512); 
-			printf("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+			printf("     0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F");
 			for (i = 0; i < 512; i ++)
 			{
 				if ((i % 16) == 0)
 				{
 					printf("\n%X  ", i); // prints hex of i for the 0, 10, 20, etc. values to the left of the table when we need a new line
-					if (i < 254) // this also keeps spacing consistent
+					if (i < 0x100) // this keeps spacing consistent
 					{
-						printf(" ");		
+						printf(" ");
+						if (i < 0x10) // this also keeps spacing consistent, only happens on the first line of output
+						{
+							printf(" ");
+						}		
 					}
 				}
-				printf("%X  ", buf[i]); // prints one byte of the hex int for each value in buf
+				printf("%X  ", buf[i] & 0xff); // prints the lowest byte (by pointing to bits 0-7 of the buffer item) of the int in hex for each value in buf
+				if((buf[i] & 0xff) < 0x10){ // another spacing if, gives one-digit values an extra space
+					printf(" ");
+				}
 			}
-			printf("\n");// move to a new line after the printing
-			lseek(floppyDrive, 0L, 0);//needed to return to start of file
+			printf("\n"); // move to a new line after the printing
+			lseek(floppyDrive, 0L, 0); // needed to return to start of file
+			sectorNum = 0; // reset sector number for repeated use
         }
-        else if (strcmp(command, "showfat") == 0)
+        else if ((strcmp(command, "showfat") == 0) && (mounted == 1))
         {
 
         }
 
-        else
+        else if (mounted == 1) // this can be here instead of in every else-if because the ones that don't need it come first.
         {
             printf("unknown command. to see a list of commands, type help\n");
         }
+		else
+		{
+			printf("please mount a floppy disk before trying to read it.\n");
+		}
 
 
         printf("enter floppy command: ");
