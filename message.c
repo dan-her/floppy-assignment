@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     int mounted = 0; // for checking if floppy has actually been mounted in fumount
     int sectorNum = 0;
     int floppyDrive;
-	int i, j = 0; // iteration variable(s)
+	int i, j = 0, k; // iteration variable(s)
 
     printf("enter floppy command: ");
     scanf("%s", command);
@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
         else if ((strcmp(command, "traverse") == 0) && (mounted == 1)) // this is not working! do not use it yet, unless you mean to test it
         {
 			char potentialFlag[128];
+			char filename;
 			scanf("%s", potentialFlag); // makes a flag required, not sure how to skip it if there's no flag
 			buf = (char *) malloc(32); // buf is going to be used on a per-entry basis here, so we just give it the file size's space
 			lseek(floppyDrive, 9728L, 0); // seeks past the first 19 sectors of the floppy (19 sectors * 512 bytes each) to get to root
@@ -100,13 +101,26 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				for (i = 0; i < 224; i++) // iterates thru the whole of root
-				{
+				//for (i = 0; i < 224; i++) // iterates thru the whole of root
+				//{
 					read(floppyDrive, buf, 32); // reads the file
-					for (j = 1; j < 9; j++)
+					for (j = 0; j < 32; j++)
+					{						
+						printf("%d ", j);
+						for (k = 0; k < 8; k++)
+						{
+							printf("%d", !!((buf[j] << k) & 0x80));
+						}		
+						printf("\n");
+					}
+					printf("a.cla?");
+/*					for (j = 1; j < 24; j++)
 					{
-						char filename = buf[j];
+						if (j % 2 != 0)
+						{
+						filename = buf[j];
 						printf("%c-", filename);//for some reason there's an extra blank character printed between each character, shown by the "-"
+						}
 					}
 					printf("\n"); // moves to the next line for the next filename
 					/* this conditional might not be needed, but I'm keeping it around on the off-chance it is
@@ -118,7 +132,7 @@ int main(int argc, char *argv[])
 					{
 						
 					}*/
-				}
+				//}
 			}
 			lseek(floppyDrive, 0L, 0);// needed to return to start of file
         }
