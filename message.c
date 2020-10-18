@@ -103,25 +103,34 @@ int main(int argc, char *argv[])
 				for (i = 0; i < 224; i++) // iterates thru the whole of root
 				{
 					read(floppyDrive, buf, 32); // reads the file
-					for (j = 1; j < 9; j++)
+
+					for (j = 1; j < 30; j++)
 					{
-						char filename = buf[j];
-						printf("%c-", filename);//for some reason there's an extra blank character printed between each character, shown by the "-"
-					}
-					printf("\n"); // moves to the next line for the next filename
-					/* this conditional might not be needed, but I'm keeping it around on the off-chance it is
+					    if(isprint(buf[j]) == 0 || buf[j] == ' ')
+                        {
+					        continue;
+                        }
+					    char file = buf[j];
+					    printf("%c", file);
+                    }
+                    printf("\n");
+
+                    // moves to the next line for the next filename
+					/* this conditional might not be needed, but I'm keeping it around on the off-chance it is fmount /home/p/Downloads/imagefile.img
 					if () // the whole of buf is empty, meaning that there is no file.
 					{
 						;  //just do nothing for that file
 					}
 					else
 					{
-						
+
 					}*/
 				}
+
 			}
 			lseek(floppyDrive, 0L, 0);// needed to return to start of file
         }
+
         else if ((strcmp(command, "showsector") == 0) && (mounted == 1))
         {
 			char sectornum[4] = {'\0', '\0', '\0', '\0'};// these are not keyboard characters, so we they won't ever be accidentally input
@@ -187,7 +196,7 @@ int main(int argc, char *argv[])
 			}
 			buf = (char *) malloc(512);
 			lseek(floppyDrive, (long)(512*sectorNum), 0);
-			read(floppyDrive, buf, 512); 
+			read(floppyDrive, buf, 512);
 			printf("     0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F");
 			for (i = 0; i < 512; i ++)
 			{
@@ -200,7 +209,7 @@ int main(int argc, char *argv[])
 						if (i < 0x10) // this also keeps spacing consistent, only happens on the first line of output
 						{
 							printf(" ");
-						}		
+						}
 					}
 				}
 				printf("%X  ", buf[i] & 0xff); // prints the lowest byte (by pointing to bits 0-7 of the buffer item) of the int in hex for each value in buf
@@ -212,14 +221,23 @@ int main(int argc, char *argv[])
 			lseek(floppyDrive, 0L, 0); // needed to return to start of file
 			sectorNum = 0; // reset sector number for repeated use
         }
+
+
         else if ((strcmp(command, "showfat") == 0) && (mounted == 1))
         {
+
 
         }
 		else if ((strcmp(command, "showfile") == 0) && (mounted == 1))
 		{
+		    int foundFile = 0;
+            buf = (char *) malloc(512);
+            char fileName[128];
+            scanf("%s", fileName);
 
-		}
+
+
+        }
         else if (mounted == 1) // this can be here instead of in every else-if because the ones that don't need it come first.
         {
             printf("unknown command. to see a list of commands, type help\n");
