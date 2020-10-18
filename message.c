@@ -103,16 +103,21 @@ int main(int argc, char *argv[])
 				for (i = 0; i < 224; i++) // iterates thru the whole of root
 				{
 					read(floppyDrive, buf, 32); // reads the file
-
-					for (j = 1; j < 30; j++)
-					{
-					    if(isprint(buf[j]) == 0 || buf[j] == ' ')
+					if(buf[26] == 0)
+                    {
+                        for (j = 1; j < 30; j++)
                         {
-					        continue;
+                            if(isprint(buf[j]) == 0 || buf[j] == ' ')
+                            {
+                                continue;
+                            }
+                            char file = buf[j];
+                            printf("%c", file);
                         }
-					    char file = buf[j];
-					    printf("%c", file);
                     }
+                    else
+                        continue;
+
                     printf("\n");
 
                     // moves to the next line for the next filename
