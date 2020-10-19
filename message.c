@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     int mounted = 0; // for checking if floppy has actually been mounted in fumount
     int sectorNum = 0;
     int floppyDrive;
-	int i, j = 0; // iteration variable(s)
+	int i, j = 0, k; // iteration variable(s)
 
     printf("enter floppy command: ");
     scanf("%s", command);
@@ -91,6 +91,10 @@ int main(int argc, char *argv[])
         else if ((strcmp(command, "traverse") == 0) && (mounted == 1)) // this is not working! do not use it yet, unless you mean to test it
         {
 			char potentialFlag[128];
+			char file;
+			int firstValidCluster;
+			int attributeByte;
+			int isDir = 0;
 			scanf("%s", potentialFlag); // makes a flag required, not sure how to skip it if there's no flag
 			buf = (char *) malloc(32); // buf is going to be used on a per-entry basis here, so we just give it the file size's space
 			lseek(floppyDrive, 9728L, 0); // seeks past the first 19 sectors of the floppy (19 sectors * 512 bytes each) to get to root
@@ -103,22 +107,49 @@ int main(int argc, char *argv[])
 				for (i = 0; i < 224; i++) // iterates thru the whole of root
 				{
 					read(floppyDrive, buf, 32); // reads the file
-					if(buf[26] == 0)
+					firstValidCluster = buf[26] + (buf[27] << 8); //saves first valid cluster to check if the file is valid
+					attributeByte = buf[11];
+					if(firstValidCluster != 0) // checks if the file has valid clusters.
                     {
-                        for (j = 1; j < 30; j++)
+						printf("/"); // each is in the root, so we start with the / that says that.
+                        for (j = 0; j < 8; j++)
                         {
-                            if(isprint(buf[j]) == 0 || buf[j] == ' ')
-                            {
-                                continue;
-                            }
-                            char file = buf[j];
-                            printf("%c", file);
+                            file = buf[j];
+							if (((int)attributeByte) >> 4 == 1 || ((int)attributeByte) >> 4 == 3) // checks  2^4 bit of attributeByte, regardless of the 2^5 bit
+							{
+								isDir = 1;
+							}
+							if (file != ' ')//skip whitespace filler in short filenames
+							{ 
+	                            printf("%c", file);
+							}
                         }
+						if ((attributeByte != 0x0f) && isDir != 1) // prints files with their extensions, skipping long filename entries. also skips directories
+						{
+							printf(".");// filename/extension separator needs to be printed specially
+							for (j = 8; j < 11; j++)
+							{
+								file = buf[j];
+								if (file != ' ')//skip whitespace filler in short file extensions
+								{ 
+	                    	        printf("%c", file);
+								}
+							}
+						}
+						if (isDir == 1) // prints directory contents
+						{
+							printf("		<DIR>");
+							/*
+							lseek to the location pointed to by firstValidCluster after saving its current position
+							do the data reading there
+							oh no this needs to be recursive that means it needs to be its own function
+							return to the position we were at
+							 */
+						}
+						printf("\n");
+						isDir = 0; // reset isDir for next item in root
                     }
-                    else
-                        continue;
-
-                    printf("\n");
+                    
 
                     // moves to the next line for the next filename
 					/* this conditional might not be needed, but I'm keeping it around on the off-chance it is fmount /home/p/Downloads/imagefile.img
