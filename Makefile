@@ -1,8 +1,2 @@
-output: message.o
-	g++ message.o -o output -lm
-
-message.o: message.c
-	g++ -c message.c
-
-clean:
-	rm *.o output
+floppybrowser: main.c commands.c
+	gcc -o floppyBrowser main.c commands.c
