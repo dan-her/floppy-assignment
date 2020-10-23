@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 
 
         else if ((strstr(command, "showfat") != NULL) && (mounted == 1))
-        { // this isn't even here yet
-			printf("showfat!\n");
+        {
+			showfat(arg, floppyDrive);
 
         }
 		else if ((strstr(command, "showfile") != NULL) && (mounted == 1))

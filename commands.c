@@ -227,3 +227,38 @@ void showsector(char *arg, int floppyDrive)
 	lseek(floppyDrive, 0L, 0); // needed to return to start of file
 	free(buf);
 }
+
+void showfat(char *arg, int floppyDrive)
+{
+    char *buf = (char *) malloc(256);
+    lseek(floppyDrive, 512, 0); //seeking passed the first cluster
+    read(floppyDrive, buf, 256);
+    printf("    0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f");
+    for (int i = 0; i < 256; i ++)
+    {
+        if ((i % 16) == 0)
+        {
+            printf("\n%X ", i);
+            if (i < 0x100)
+            {
+                printf(" ");
+                if (i < 0x10)
+                {
+                    printf(" ");
+                }
+            }
+        } //prints columns correctly
+
+        if ((buf[i] & 0x0f)  == 0) //prints the frees
+        {
+            printf("FREE ");
+        }
+        else
+        printf("%x  ", buf[i]); //couldn't figure out how to get the
+
+    }
+    printf("\n");
+    lseek(floppyDrive, 0L, 0);//undo the seek
+    free(buf);
+
+}
